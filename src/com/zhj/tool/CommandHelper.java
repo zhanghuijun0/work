@@ -1,6 +1,7 @@
 package com.zhj.tool;
 
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 /**
  * 此类用来执行Command命令
@@ -9,18 +10,23 @@ import java.io.BufferedReader;
  *
  */
 public class CommandHelper {
-	private boolean execCommand(String cmd) {
+	CreateFolderHelper mFolderHelper = new CreateFolderHelper();
+	WriteFileHelper mWriteFileHelper = new WriteFileHelper();
+	String mLogPath = "log/command.log";
+
+	public boolean execCommand(String cmd) {
+		mWriteFileHelper.writer(mLogPath, cmd+"/n", true);
+		mFolderHelper.createFile(mLogPath);
 		Process process = null;
 		BufferedReader br = null;
 		try {
 			process = Runtime.getRuntime().exec(cmd);
-//			StringBuffer sbOut = new StringBuffer(1000);
-//			br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//			String line = null;
-//			while ((line = br.readLine()) != null) {
-//				System.out.println(line);
-//			}
-			process.waitFor();
+			br = new BufferedReader(new InputStreamReader(
+					process.getInputStream()));
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				mWriteFileHelper.writer(mLogPath, line+"/n", true);
+			}
 		} catch (Exception e) {
 			return false;
 		} finally {
@@ -35,6 +41,6 @@ public class CommandHelper {
 
 	public static void main(String[] args) {
 		CommandHelper mCommandHelper = new CommandHelper();
-		mCommandHelper.execCommand("dir");
+		mCommandHelper.execCommand("ls /opt");
 	}
 }
